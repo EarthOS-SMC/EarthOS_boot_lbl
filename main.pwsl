@@ -1,0 +1,119 @@
+// EarthOS installer boot(loader?)
+//
+//    Copyright (C) 2021  adazem009
+//
+// This loads the EarthOS kernel. It's something like a minimal bootloader.
+//
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+//
+// Functions
+linkdef/"_listpart"
+{
+	warp
+		// _listpart
+		// (no arguments)
+		cpdisk/d,1/"bin"
+		bintolist/bin/"blist"
+		getlistlength/"blist"/"bl"
+		setlist/"pt","ptd"
+		set/"i",0
+		while/[i < bl]
+			// Partition name
+			calc/"i=i+1"
+			getitem/"blist",i/"pr"
+			append/pr/"pt"
+			// Partition size
+			calc/"i=i+1"
+			getitem/"blist",i/"pr"
+			append/pr/"pts"
+			// Partition content
+			calc/"i=i+1"
+			getitem/"blist",i/"pr"
+			append/pr/"ptd"
+		endloop
+	endwarp
+}
+linkdef/"_ls"
+{
+	warp
+		// _ls/[path],[filesystem image]
+		getitem/"arg_1",1/"path"
+		getitem/"arg_1",2/"fs"
+		setlist/"ftypes","fnames","fdata"
+		// Convert binary
+		bintolist/fs/"fsl"
+		getlistlength/"fsl"/"fsll"
+		set/"i",1
+		//     ^^^ This is 1 because the first item is the filesystem format (FSSC2 in this case)
+		while/[i < fsll]
+			// Definition path
+			calc/"i=i+1"
+			getitem/"fsl",i/"def"
+			//print/"def=",def,\n
+			// Number of files
+			calc/"i=i+1"
+			getitem/"fsl",i/"c"
+			//print/"c=",c,\n
+			// Get files under current definition
+			repeat/c
+				// Type - file or folder
+				calc/"i=i+1"
+				getitem/"fsl",i/"ft"
+				// File name
+				calc/"i=i+1"
+				getitem/"fsl",i/"fn"
+				//print/fn,\n
+				// File data
+				calc/"i=i+1"
+				getitem/"fsl",i/"fd"
+				// Skip permissions, owner, group and attributes
+				calc/"i=i+4"
+				if/[def == path]
+					append/ft/"ftypes"
+					append/fn/"fnames"
+					append/fd/"fdata"
+				endif
+			endloop
+		endloop
+	endwarp
+}
+print/"kernel: /kernel/ekrnl",\n
+print/"rootfs: /dev/sda1",\n
+warp
+	// Get current disk and partition
+	getitem/"arg_1",1/"disk"
+	getitem/"arg_1",2/"part"
+	// Load EarthOS kernel
+	set/"d",disk
+	_listpart
+	getitem/"ptd",part/"fs"
+	_ls/"/boot",fs
+	getlistlength/"fnames"/"fc"
+	set/"i2",0
+	while/[i2 < fc]
+		calc/"i2=i2+1"
+		getitem/"fnames",i2/"cfn"
+		if/[cfn == "ekrnl"]
+			getitem/"fdata",i2/"kernel"
+			// Warp should be disabled here
+			endwarp
+				run/kernel,"bg"/"root=/dev/sda1"
+			warp
+			exit
+		endif
+	endloop
+endwarp
+print/"error: failed to load kernel",\n
+wait/10
+reboot
