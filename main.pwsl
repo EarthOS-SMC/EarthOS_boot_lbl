@@ -19,6 +19,7 @@
 //
 include/"fpt.pwsl"
 include/"fssc2.pwsl"
+//
 print/"kernel: /kernel/ekrnl",\n
 print/"rootfs: /dev/sda1",\n
 warp
