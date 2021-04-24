@@ -15,7 +15,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
-linkdef/"_ls"
+linkdef/"_ls","ls"
 {
 	warp
 		// _ls/[path],[filesystem image]
