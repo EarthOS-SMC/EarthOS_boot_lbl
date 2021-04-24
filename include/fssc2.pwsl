@@ -1,0 +1,61 @@
+// FSSC2 - read
+//
+//    Copyright (C) 2021  adazem009
+//
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+//
+linkdef/"_ls"
+{
+	warp
+		// _ls/[path],[filesystem image]
+		getitem/"arg_1",1/"path"
+		getitem/"arg_1",2/"fs"
+		setlist/"ftypes","fnames","fdata"
+		// Convert binary
+		bintolist/fs/"fsl"
+		getlistlength/"fsl"/"fsll"
+		set/"i",1
+		//     ^^^ This is 1 because the first item is the filesystem format (FSSC2 in this case)
+		while/[i < fsll]
+			// Definition path
+			calc/"i=i+1"
+			getitem/"fsl",i/"def"
+			//print/"def=",def,\n
+			// Number of files
+			calc/"i=i+1"
+			getitem/"fsl",i/"c"
+			//print/"c=",c,\n
+			// Get files under current definition
+			repeat/c
+				// Type - file or folder
+				calc/"i=i+1"
+				getitem/"fsl",i/"ft"
+				// File name
+				calc/"i=i+1"
+				getitem/"fsl",i/"fn"
+				//print/fn,\n
+				// File data
+				calc/"i=i+1"
+				getitem/"fsl",i/"fd"
+				// Skip permissions, owner, group and attributes
+				calc/"i=i+4"
+				if/[def == path]
+					append/ft/"ftypes"
+					append/fn/"fnames"
+					append/fd/"fdata"
+				endif
+			endloop
+		endloop
+	endwarp
+}
