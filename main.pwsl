@@ -21,7 +21,7 @@ include/"fpt.pwsl"
 include/"fssc2.pwsl"
 //
 print/"kernel: /kernel/ekrnl",\n
-print/"rootfs: /dev/sda1",\n
+print/"rootfs: /dev/md1",\n
 warp
 	// Get current disk and partition
 	getitem/"arg_1",1/"disk"
@@ -40,7 +40,7 @@ warp
 			getitem/"fdata",i2/"kernel"
 			// Warp should be disabled here
 			endwarp
-				run/kernel,"bg"/"root=/dev/sda1"
+				run/kernel,"bg"/"root=/dev/md1"
 			warp
 			exit
 		endif
