@@ -20,7 +20,7 @@
 include/"fpt.pwsl"
 include/"fssc2.pwsl"
 //
-print/"kernel: /kernel/ekrnl",\n
+print/"kernel: /boot/ekrnl",\n
 print/"rootfs: /dev/md1",\n
 warp
 	// Get current disk and partition
